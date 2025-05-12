@@ -1,12 +1,24 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { EVersioning } from 'src/types/enum/EVersioning.enum';
 import { CreateUserDto } from './dto/createUsert.dto';
 import { User } from './model/user.entity';
+import { User as UserDecorator } from 'src/decorator/user.decorator';
 import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
 import { RoleGuard } from 'src/guard/role.guard';
 import { Roles } from 'src/decorator/roles.decorator';
 import { ERole } from 'src/types/enum/ERole.enum';
+import { IJwtPayload } from 'src/types/interface/IJwtPayload.interface';
+import { UpdateUserDto } from './dto/updateUsert.dto';
 
 @Controller({
   version: EVersioning.V1,
@@ -34,5 +46,35 @@ export class UserController {
   @Roles(ERole.ADMIN)
   protected getAllUserHandler(): Promise<User[]> {
     return this.userService.findAllUser();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  protected getUserByIDHandler(@Param('id') id: string): Promise<User> {
+    return this.userService.findOneUser(id);
+  }
+
+  @Get('data/profile')
+  @UseGuards(JwtAuthGuard)
+  protected getUserProfileHandler(
+    @UserDecorator() user: IJwtPayload,
+  ): Promise<User> {
+    return this.userService.findOneUser(user.id);
+  }
+
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  protected updateUserHandler(
+    @UserDecorator() user: IJwtPayload,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    return this.userService.updateUser(user.id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(ERole.ADMIN)
+  protected deleteUserHandler(@Param('id') id: string): Promise<void> {
+    return this.userService.deleteUser(id);
   }
 }

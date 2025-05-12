@@ -1,10 +1,12 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
+import { EGender } from 'src/types/enum/Gender.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -37,4 +39,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(5)
   address: string;
+
+  @IsEnum(EGender)
+  @IsNotEmpty()
+  gender: EGender;
 }

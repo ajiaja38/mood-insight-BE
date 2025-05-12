@@ -48,6 +48,7 @@ export class UserService {
       phoneNumber: createUserDto.phoneNumber,
       password,
       address: createUserDto.address,
+      gender: createUserDto.gender,
       role: isAdmin ? ERole.ADMIN : ERole.USER,
     });
 
@@ -59,11 +60,34 @@ export class UserService {
 
   public findAllUser(): Promise<User[]> {
     this.messageService.setMessage('Get all user successfully');
-    return this.userRepository.find();
+    return this.userRepository.find({
+      select: [
+        'id',
+        'name',
+        'email',
+        'phoneNumber',
+        'address',
+        'gender',
+        'role',
+      ],
+    });
   }
 
   public async findOneUser(id: string): Promise<User> {
-    const user: User | null = await this.userRepository.findOneBy({ id });
+    const user: User | null = await this.userRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'name',
+        'email',
+        'phoneNumber',
+        'address',
+        'gender',
+        'role',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
 
     if (!user) throw new NotFoundException('User not found');
 
@@ -75,6 +99,16 @@ export class UserService {
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
     const user: User = await this.findOneUser(id);
+
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existing = await this.userRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+
+      if (existing && existing.id !== id) {
+        throw new BadRequestException('Email already in use');
+      }
+    }
 
     user.name = updateUserDto.name;
     user.email = updateUserDto.email;

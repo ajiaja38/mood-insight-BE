@@ -1,4 +1,5 @@
 import { ERole } from 'src/types/enum/ERole.enum';
+import { EGender } from 'src/types/enum/Gender.enum';
 import {
   Column,
   CreateDateColumn,
@@ -9,7 +10,7 @@ import {
 
 @Entity({
   name: 'mst_user',
-  orderBy: { id: 'ASC' },
+  orderBy: { id: 'DESC' },
 })
 export class User {
   @PrimaryColumn({ name: 'id' })
@@ -50,6 +51,13 @@ export class User {
     default: ERole.USER,
   })
   role: ERole;
+
+  @Column({
+    type: 'enum',
+    enum: EGender,
+    enumName: 'EGender',
+  })
+  gender: EGender;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

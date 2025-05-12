@@ -12,6 +12,8 @@ import { UserModule } from './app/user/user.module';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { DataSource } from 'typeorm';
 import { AuthModule } from './app/auth/auth.module';
+import { DisorderModule } from './app/disorder/disorder.module';
+import { SymptomModule } from './app/symptom/symptom.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { AuthModule } from './app/auth/auth.module';
     MessageModule,
     UserModule,
     AuthModule,
+    DisorderModule,
+    SymptomModule,
   ],
   controllers: [AppController],
   providers: [
