@@ -16,6 +16,7 @@ import { Roles } from 'src/decorator/roles.decorator';
 import { ERole } from 'src/types/enum/ERole.enum';
 import { DisorderDto } from './dto/createDisorder.dto';
 import { Disorder } from './model/disorder.entity';
+import { IDetailDisorder } from './dto/response.dto';
 
 @Controller({
   path: 'disorder',
@@ -41,7 +42,9 @@ export class DisorderController {
 
   @Get(':id')
   @Roles(ERole.ADMIN, ERole.USER)
-  protected findOneDisorderHandler(@Param('id') id: string): Promise<Disorder> {
+  protected findOneDisorderHandler(
+    @Param('id') id: string,
+  ): Promise<IDetailDisorder> {
     return this.disorderService.findOneDisorder(id);
   }
 

@@ -15,6 +15,7 @@ import { AuthModule } from './app/auth/auth.module';
 import { DisorderModule } from './app/disorder/disorder.module';
 import { SymptomModule } from './app/symptom/symptom.module';
 import { KnowledgeBaseModule } from './app/knowledge-base/knowledge-base.module';
+import { SolutionModule } from './app/solution/solution.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { KnowledgeBaseModule } from './app/knowledge-base/knowledge-base.module'
     DisorderModule,
     SymptomModule,
     KnowledgeBaseModule,
+    SolutionModule,
   ],
   controllers: [AppController],
   providers: [

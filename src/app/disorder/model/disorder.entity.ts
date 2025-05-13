@@ -1,4 +1,5 @@
 import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
+import { Solution } from 'src/app/solution/model/solution.entity';
 import {
   Column,
   CreateDateColumn,
@@ -32,4 +33,7 @@ export class Disorder {
     (knowledgeBase: KnowledgeBase) => knowledgeBase.disorder,
   )
   knowledgeBase: KnowledgeBase[];
+
+  @OneToMany(() => Solution, (solution: Solution) => solution.disorder)
+  solution: Solution[];
 }

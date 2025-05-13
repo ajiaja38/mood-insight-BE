@@ -9,6 +9,7 @@ import { Disorder } from './model/disorder.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { DisorderDto } from './dto/createDisorder.dto';
 import { generateID } from 'src/utils/generateID';
+import { IDetailDisorder } from './dto/response.dto';
 
 @Injectable()
 export class DisorderService {
@@ -49,22 +50,33 @@ export class DisorderService {
     });
   }
 
-  public async findOneDisorder(id: string): Promise<Disorder> {
+  public async findOneDisorder(id: string): Promise<IDetailDisorder> {
     const disorder: Disorder | null = await this.disorderRepository.findOne({
       where: { id },
-      select: ['id', 'name', 'description', 'createdAt', 'updatedAt'],
+      relations: ['solution'],
     });
 
     if (!disorder) throw new NotFoundException('Disorder not found');
 
-    return disorder;
+    this.messageService.setMessage('Get disorder successfully');
+    return {
+      id: disorder.id,
+      name: disorder.name,
+      description: disorder.description,
+      createdAt: disorder.createdAt,
+      updatedAt: disorder.updatedAt,
+      solutions: disorder.solution.map((solution) => ({
+        id: solution.id,
+        solution: solution.solution,
+      })),
+    };
   }
 
   public async updateDisorder(
     id: string,
     updateDisorderDto: DisorderDto,
   ): Promise<Disorder> {
-    const disorder: Disorder = await this.findOneDisorder(id);
+    const disorder: IDetailDisorder = await this.findOneDisorder(id);
 
     disorder.name = updateDisorderDto.name;
     disorder.description = updateDisorderDto.description;
