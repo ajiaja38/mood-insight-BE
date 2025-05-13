@@ -16,6 +16,9 @@ import { DisorderModule } from './app/disorder/disorder.module';
 import { SymptomModule } from './app/symptom/symptom.module';
 import { KnowledgeBaseModule } from './app/knowledge-base/knowledge-base.module';
 import { SolutionModule } from './app/solution/solution.module';
+import { ConsultationModule } from './app/consultation/consultation.module';
+import { ConsultationDetailModule } from './app/consultation-detail/consultation-detail.module';
+import { DiagnosisResultModule } from './app/diagnosis-result/diagnosis-result.module';
 
 @Module({
   imports: [
@@ -52,6 +55,9 @@ import { SolutionModule } from './app/solution/solution.module';
     SymptomModule,
     KnowledgeBaseModule,
     SolutionModule,
+    ConsultationModule,
+    ConsultationDetailModule,
+    DiagnosisResultModule,
   ],
   controllers: [AppController],
   providers: [
