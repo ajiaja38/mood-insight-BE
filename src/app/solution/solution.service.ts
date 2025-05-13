@@ -32,7 +32,7 @@ export class SolutionService {
     });
 
     const lastID: string | null = lastData[0]?.id ?? null;
-    const id: string = generateID('S', lastID);
+    const id: string = generateID('SL', lastID);
 
     const disorder: Disorder | null = await this.disorderRepository.findOneBy({
       id: createSolutionDto.disorderId,

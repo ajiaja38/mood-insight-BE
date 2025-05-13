@@ -29,7 +29,7 @@ export class DisorderService {
     });
 
     const lastID: string | null = lastData[0]?.id ?? null;
-    const id: string = generateID('P', lastID);
+    const id: string = generateID('D', lastID);
 
     const disorder: Disorder = await this.disorderRepository.save({
       id,
