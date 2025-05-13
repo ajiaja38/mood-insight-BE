@@ -1,4 +1,5 @@
 import { ConsultationDetail } from 'src/app/consultation-detail/model/consultation-detail.entity';
+import { DiagnosisResult } from 'src/app/diagnosis-result/model/diagnosis-result.entity';
 import { User } from 'src/app/user/model/user.entity';
 import {
   CreateDateColumn,
@@ -30,4 +31,10 @@ export class Consultation {
     (consultationDetail) => consultationDetail.consultation,
   )
   consultationDetail: ConsultationDetail[];
+
+  @OneToMany(
+    () => DiagnosisResult,
+    (diagnosisResult) => diagnosisResult.consultation,
+  )
+  diagnosisResult: DiagnosisResult[];
 }

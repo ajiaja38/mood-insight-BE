@@ -1,3 +1,4 @@
+import { DiagnosisResult } from 'src/app/diagnosis-result/model/diagnosis-result.entity';
 import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
 import { Solution } from 'src/app/solution/model/solution.entity';
 import {
@@ -36,4 +37,10 @@ export class Disorder {
 
   @OneToMany(() => Solution, (solution: Solution) => solution.disorder)
   solution: Solution[];
+
+  @OneToMany(
+    () => DiagnosisResult,
+    (diagnosisResult) => diagnosisResult.disorder,
+  )
+  diagnosisResult: DiagnosisResult[];
 }
