@@ -1,23 +1,19 @@
 import { ConsultationDetail } from 'src/app/consultation-detail/model/consultation-detail.entity';
-import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
+import { User } from 'src/app/user/model/user.entity';
 import {
-  Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
-export class Symptom {
+@Entity('consultation')
+export class Consultation {
   @PrimaryColumn({ name: 'id' })
   id: string;
-
-  @Column({
-    nullable: false,
-  })
-  symptom: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
@@ -25,15 +21,13 @@ export class Symptom {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(
-    () => KnowledgeBase,
-    (knowledgeBase: KnowledgeBase) => knowledgeBase.symptom,
-  )
-  knowledgeBase: KnowledgeBase[];
+  @ManyToOne(() => User, (user: User) => user.consultation)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: User;
 
   @OneToMany(
     () => ConsultationDetail,
-    (consultationDetail: ConsultationDetail) => consultationDetail.symptom,
+    (consultationDetail) => consultationDetail.consultation,
   )
   consultationDetail: ConsultationDetail[];
 }

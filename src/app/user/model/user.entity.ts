@@ -1,9 +1,11 @@
+import { Consultation } from 'src/app/consultation/model/consultation.entity';
 import { ERole } from 'src/types/enum/ERole.enum';
 import { EGender } from 'src/types/enum/Gender.enum';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -64,4 +66,7 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
+
+  @OneToMany(() => Consultation, (consultation) => consultation.user)
+  consultation: Consultation[];
 }
