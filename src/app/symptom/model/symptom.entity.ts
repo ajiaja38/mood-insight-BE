@@ -1,7 +1,9 @@
+import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,4 +23,10 @@ export class Symptom {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
+
+  @OneToMany(
+    () => KnowledgeBase,
+    (knowledgeBase: KnowledgeBase) => knowledgeBase.symptom,
+  )
+  knowledgeBase: KnowledgeBase[];
 }

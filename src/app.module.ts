@@ -14,6 +14,7 @@ import { DataSource } from 'typeorm';
 import { AuthModule } from './app/auth/auth.module';
 import { DisorderModule } from './app/disorder/disorder.module';
 import { SymptomModule } from './app/symptom/symptom.module';
+import { KnowledgeBaseModule } from './app/knowledge-base/knowledge-base.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { SymptomModule } from './app/symptom/symptom.module';
     AuthModule,
     DisorderModule,
     SymptomModule,
+    KnowledgeBaseModule,
   ],
   controllers: [AppController],
   providers: [
