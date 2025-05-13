@@ -1,11 +1,13 @@
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
   Max,
   Min,
 } from 'class-validator';
+import { EValBelief } from 'src/types/enum/EValueBelief.enum';
 
 class DetailKBDto {
   @IsString()
@@ -17,9 +19,10 @@ class DetailKBDto {
   disorderId: string;
 
   @IsNumber()
+  @IsEnum(EValBelief)
   @Min(0)
   @Max(1)
-  weight: number;
+  weight: EValBelief;
 }
 
 export class CreateKBDto {
