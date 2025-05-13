@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ConsultationService } from './consultation.service';
 import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
 import { RoleGuard } from 'src/guard/role.guard';
@@ -9,6 +9,7 @@ import { Consultation } from './model/consultation.entity';
 import { User } from 'src/decorator/user.decorator';
 import { IJwtPayload } from 'src/types/interface/IJwtPayload.interface';
 import { EVersioning } from 'src/types/enum/EVersioning.enum';
+import { IResAllConsultation } from './dto/response.dto';
 
 @Controller({
   path: 'consultation',
@@ -28,5 +29,27 @@ export class ConsultationController {
       user.id,
       createConsultationDto,
     );
+  }
+
+  @Get()
+  @Roles(ERole.ADMIN)
+  protected getAllConsultationHandler(): Promise<IResAllConsultation[]> {
+    return this.consultationService.findAllConsultation();
+  }
+
+  @Get('/user')
+  @Roles(ERole.ADMIN, ERole.USER)
+  protected getAllUserConsultationHandler(
+    @User() user: IJwtPayload,
+  ): Promise<IResAllConsultation[]> {
+    return this.consultationService.findAllConsultation(user.id);
+  }
+
+  @Get(':id')
+  @Roles(ERole.ADMIN, ERole.USER)
+  protected getDetailConsultationHandler(
+    @Param('id') id: string,
+  ): Promise<any> {
+    return this.consultationService.findDetailConsultation(id);
   }
 }

@@ -16,6 +16,11 @@ import { Transactional } from 'typeorm-transactional';
 import { generateID } from 'src/utils/generateID';
 import { Symptom } from '../symptom/model/symptom.entity';
 import { Disorder } from '../disorder/model/disorder.entity';
+import {
+  IResAllConsultation,
+  IResDetailConsultation,
+} from './dto/response.dto';
+import { Solution } from '../solution/model/solution.entity';
 
 @Injectable()
 export class ConsultationService {
@@ -168,5 +173,112 @@ export class ConsultationService {
     }
 
     return mCombined;
+  }
+
+  public async findAllConsultation(
+    userId?: string,
+  ): Promise<IResAllConsultation[]> {
+    const consultation: Consultation[] = await this.consultationRepository.find(
+      {
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+        relations: [
+          'user',
+          'consultationDetail',
+          'diagnosisResult',
+          'diagnosisResult.disorder',
+        ],
+      },
+    );
+
+    this.messageService.setMessage('Get all consultation successfully');
+
+    return this.convertResponse(consultation);
+  }
+
+  private convertResponse(
+    consultations: Consultation[],
+  ): IResAllConsultation[] {
+    return consultations.map((consultation: Consultation) => {
+      const bestDiagnosis: DiagnosisResult = this.getBestDiagnosis(
+        consultation.diagnosisResult,
+      );
+
+      const percentage: string = (bestDiagnosis.belief_value * 100).toFixed(0);
+      const disorderName: string = bestDiagnosis.disorder?.name ?? 'Unknown';
+
+      return {
+        id: consultation.id,
+        user: consultation.user.name,
+        result: `${percentage}% ${disorderName}`,
+        createdAt: consultation.createdAt,
+      };
+    });
+  }
+
+  private getBestDiagnosis(
+    diagnosisResults: DiagnosisResult[],
+  ): DiagnosisResult {
+    return diagnosisResults.reduce(
+      (max, current) =>
+        current.belief_value > max.belief_value ? current : max,
+      diagnosisResults[0],
+    );
+  }
+
+  public async findDetailConsultation(
+    id: string,
+  ): Promise<IResDetailConsultation> {
+    const consultation: Consultation | null =
+      await this.consultationRepository.findOne({
+        where: {
+          id,
+        },
+        relations: [
+          'user',
+          'consultationDetail',
+          'consultationDetail.symptom',
+          'diagnosisResult',
+          'diagnosisResult.disorder',
+          'diagnosisResult.disorder.solution',
+        ],
+      });
+
+    if (!consultation) throw new NotFoundException('Consultation not found');
+
+    const bestDiagnosis: DiagnosisResult = this.getBestDiagnosis(
+      consultation.diagnosisResult,
+    );
+
+    this.messageService.setMessage('Get detail consultation successfully');
+
+    return {
+      id: consultation.id,
+      userId: consultation.user.id,
+      user: consultation.user.name,
+      userAddress: consultation.user.address,
+      userEmail: consultation.user.email,
+      userPhoneNumber: consultation.user.phoneNumber,
+      symptoms: consultation.consultationDetail.map(
+        (cd: ConsultationDetail) => ({
+          symptomId: cd.symptom.id,
+          symptom: cd.symptom.symptom,
+        }),
+      ),
+      diagnosisResult: consultation.diagnosisResult
+        .sort((a, b) => b.belief_value - a.belief_value)
+        .map((dr: DiagnosisResult) => ({
+          id: dr.id,
+          belief_value: parseFloat(dr.belief_value.toFixed(2)),
+          disorder: dr.disorder.name,
+        })),
+      solution: bestDiagnosis.disorder.solution.map(
+        (s: Solution) => s.solution,
+      ),
+      createdAt: consultation.createdAt,
+    };
   }
 }
