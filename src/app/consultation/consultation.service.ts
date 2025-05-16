@@ -213,7 +213,7 @@ export class ConsultationService {
       return {
         id: consultation.id,
         user: consultation.user.name,
-        result: `${percentage}% ${disorderName}`,
+        result: `nilai belief: ${percentage}% ${disorderName}`,
         createdAt: consultation.createdAt,
       };
     });

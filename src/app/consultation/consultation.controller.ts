@@ -9,7 +9,10 @@ import { Consultation } from './model/consultation.entity';
 import { User } from 'src/decorator/user.decorator';
 import { IJwtPayload } from 'src/types/interface/IJwtPayload.interface';
 import { EVersioning } from 'src/types/enum/EVersioning.enum';
-import { IResAllConsultation } from './dto/response.dto';
+import {
+  IResAllConsultation,
+  IResDetailConsultation,
+} from './dto/response.dto';
 
 @Controller({
   path: 'consultation',
@@ -49,7 +52,7 @@ export class ConsultationController {
   @Roles(ERole.ADMIN, ERole.USER)
   protected getDetailConsultationHandler(
     @Param('id') id: string,
-  ): Promise<any> {
+  ): Promise<IResDetailConsultation> {
     return this.consultationService.findDetailConsultation(id);
   }
 }
