@@ -50,7 +50,7 @@ export class ConsultationService {
   public async createConsultation(
     userId: string,
     { symptomIds }: CreateConsultationDto,
-  ): Promise<any> {
+  ): Promise<Consultation> {
     const user: User | null = await this.userRepository.findOneBy({
       id: userId,
     });
