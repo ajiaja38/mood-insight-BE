@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Consultation } from './model/consultation.entity';
 import { In, Repository } from 'typeorm';
@@ -15,12 +11,16 @@ import { CreateConsultationDto } from './dto/createConsultation.dto';
 import { Transactional } from 'typeorm-transactional';
 import { generateID } from 'src/utils/generateID';
 import { Symptom } from '../symptom/model/symptom.entity';
-import { Disorder } from '../disorder/model/disorder.entity';
 import {
   IResAllConsultation,
   IResDetailConsultation,
 } from './dto/response.dto';
 import { Solution } from '../solution/model/solution.entity';
+
+interface IMassFunction {
+  disorders: string[];
+  belief: number;
+}
 
 @Injectable()
 export class ConsultationService {
@@ -50,129 +50,127 @@ export class ConsultationService {
   public async createConsultation(
     userId: string,
     { symptomIds }: CreateConsultationDto,
-  ): Promise<Consultation> {
-    const user: User | null = await this.userRepository.findOneBy({
-      id: userId,
-    });
-
+  ): Promise<any> {
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found');
 
-    const lastData: Consultation[] = await this.consultationRepository.find({
-      order: {
-        id: 'DESC',
-      },
+    const lastConsultation = await this.consultationRepository.find({
+      order: { id: 'DESC' },
       take: 1,
     });
-
-    const lastID: string | null = lastData[0]?.id ?? null;
-    const id: string = generateID('C', lastID);
-
-    const newConsultation: Consultation =
-      await this.consultationRepository.save({
-        id,
-        user,
-      });
-
-    if (!newConsultation)
-      throw new BadRequestException('Failed to create consultation');
+    const newConsultationId = generateID('C', lastConsultation[0]?.id ?? null);
+    const newConsultation = await this.consultationRepository.save({
+      id: newConsultationId,
+      user,
+    });
 
     for (const symptomId of symptomIds) {
-      const symptom: Symptom | null = await this.symtompRepository.findOneBy({
-        id: symptomId,
-      });
-
+      const symptom = await this.symtompRepository.findOneBy({ id: symptomId });
       if (!symptom) throw new NotFoundException('Symptom not found');
 
-      const lastData: ConsultationDetail[] =
-        await this.consultationDetailRepository.find({
-          order: {
-            id: 'DESC',
-          },
-          take: 1,
-        });
-
-      const lastID: string | null = lastData[0]?.id ?? null;
-      const id: string = generateID('CD', lastID);
-
-      const newConsultationDetail: ConsultationDetail =
-        await this.consultationDetailRepository.save({
-          id,
-          consultation: newConsultation,
-          symptom,
-        });
-
-      if (!newConsultationDetail)
-        throw new BadRequestException('Failed to create consultation detail');
+      const lastDetail = await this.consultationDetailRepository.find({
+        order: { id: 'DESC' },
+        take: 1,
+      });
+      const newDetailId = generateID('CD', lastDetail[0]?.id ?? null);
+      await this.consultationDetailRepository.save({
+        id: newDetailId,
+        consultation: newConsultation,
+        symptom,
+      });
     }
 
-    const knowledgeBases: KnowledgeBase[] =
-      await this.knowledgeBaseRepository.find({
-        where: {
-          symptom: {
-            id: In(symptomIds),
-          },
-        },
-        relations: ['symptom', 'disorder'],
-      });
+    const knowledgeBases = await this.knowledgeBaseRepository.find({
+      where: { symptom: { id: In(symptomIds) } },
+      relations: ['disorder', 'symptom'],
+    });
 
-    const disorderBelief: Map<string, number[]> = new Map();
+    const massFunction: IMassFunction[] = [];
 
-    for (const kb of knowledgeBases) {
-      const disorderId: string = kb.disorder.id;
-      const weight: number = kb.weight;
+    for (const symptom of symptomIds) {
+      const massFunc: IMassFunction = {
+        disorders: [],
+        belief: 0,
+      };
 
-      if (!disorderBelief.has(disorderId)) {
-        disorderBelief.set(disorderId, []);
+      let rawBelief = 0;
+
+      const sykb = knowledgeBases.filter((kb) => kb.symptom.id === symptom);
+
+      for (const kb of sykb) {
+        massFunc.disorders.push(kb.disorder.id);
+        rawBelief += kb.weight;
       }
 
-      disorderBelief.get(disorderId)?.push(weight);
+      const belief = parseFloat((rawBelief / sykb.length).toFixed(2));
+
+      massFunc.belief = belief;
+      massFunction.push(massFunc);
     }
 
-    for (const [disorderId, beliefValues] of disorderBelief.entries()) {
-      const beliefValue: number = this.demsterShafer(beliefValues);
+    console.log(massFunction);
 
-      const lastData: DiagnosisResult[] =
-        await this.diagnosisResultRepository.find({
-          order: {
-            id: 'DESC',
-          },
-          take: 1,
+    const extendedMassFunction = massFunction.map((m) => [
+      m,
+      { disorders: ['θ'], belief: parseFloat((1 - m.belief).toFixed(2)) },
+    ]);
+
+    // STEP: Fungsi combine menggunakan aturan Dempster-Shafer
+    function combine(
+      m1: IMassFunction[],
+      m2: IMassFunction[],
+    ): IMassFunction[] {
+      const result: Record<string, number> = {};
+      let conflict = 0;
+
+      for (const mf1 of m1) {
+        for (const mf2 of m2) {
+          const intersection = mf1.disorders.includes('θ')
+            ? mf2.disorders
+            : mf2.disorders.includes('θ')
+              ? mf1.disorders
+              : mf1.disorders.filter((d) => mf2.disorders.includes(d));
+
+          if (intersection.length === 0) {
+            conflict += mf1.belief * mf2.belief;
+            continue;
+          }
+
+          const key = [...new Set(intersection)].sort().join(',');
+          result[key] = (result[key] || 0) + mf1.belief * mf2.belief;
+        }
+      }
+
+      const normalizedResult: IMassFunction[] = [];
+
+      for (const key in result) {
+        const belief = result[key] / (1 - conflict);
+        const disorders = key.split(',');
+        normalizedResult.push({
+          disorders,
+          belief: parseFloat(belief.toFixed(3)),
         });
+      }
 
-      const lastID: string | null = lastData[0]?.id ?? null;
-      const id: string = generateID('DR', lastID);
-
-      const newDiagnosisResult: DiagnosisResult =
-        await this.diagnosisResultRepository.save({
-          id,
-          belief_value: beliefValue,
-          consultation: newConsultation,
-          disorder: { id: disorderId } as Disorder,
-        });
-
-      if (!newDiagnosisResult)
-        throw new BadRequestException('Failed to create diagnosis result');
+      return normalizedResult;
     }
 
-    this.messageService.setMessage('Consultation created successfully');
-    return newConsultation;
-  }
+    let combined = extendedMassFunction[0];
 
-  private demsterShafer(beliefs: number[]): number {
-    if (beliefs.length === 0) return 0;
-    if (beliefs.length === 1) return beliefs[0];
-
-    let mCombined: number = beliefs[0];
-
-    for (let i = 1; i < beliefs.length; i++) {
-      const m1: number = mCombined;
-      const m2: number = beliefs[i];
-
-      const conflict: number = (1 - m1) * (1 - m2);
-      mCombined = (m1 * m2) / (1 - conflict);
+    for (let i = 1; i < extendedMassFunction.length; i++) {
+      combined = combine(combined, extendedMassFunction[i]);
     }
 
-    return mCombined;
+    combined.sort((a, b) => b.belief - a.belief);
+
+    const mostProbableDisorders = combined[0];
+
+    console.log(combined);
+
+    return {
+      consultationId: newConsultation.id,
+      result: mostProbableDisorders,
+    };
   }
 
   public async findAllConsultation(
