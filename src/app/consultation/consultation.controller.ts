@@ -12,6 +12,7 @@ import {
   IResAllConsultation,
   IResDetailConsultation,
 } from './dto/response.dto';
+import { IResNewConsultation } from './interface/respomse.interface';
 
 @Controller({
   path: 'consultation',
@@ -26,7 +27,7 @@ export class ConsultationController {
   protected createConsultation(
     @User() user: IJwtPayload,
     @Body() createConsultationDto: CreateConsultationDto,
-  ): Promise<any> {
+  ): Promise<IResNewConsultation> {
     return this.consultationService.createConsultation(
       user.id,
       createConsultationDto,

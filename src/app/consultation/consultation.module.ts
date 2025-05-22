@@ -9,6 +9,7 @@ import { DiagnosisResult } from '../diagnosis-result/model/diagnosis-result.enti
 import { User } from '../user/model/user.entity';
 import { KnowledgeBase } from '../knowledge-base/model/knowledge-base.entity';
 import { Symptom } from '../symptom/model/symptom.entity';
+import { DiagnosisResultDisorder } from '../diagnosis-result-disorder/model/diagnosis-result-disorder';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Symptom } from '../symptom/model/symptom.entity';
       User,
       KnowledgeBase,
       Symptom,
+      DiagnosisResultDisorder,
     ]),
     MessageModule,
   ],

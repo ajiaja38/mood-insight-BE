@@ -19,6 +19,7 @@ import { SolutionModule } from './app/solution/solution.module';
 import { ConsultationModule } from './app/consultation/consultation.module';
 import { ConsultationDetailModule } from './app/consultation-detail/consultation-detail.module';
 import { DiagnosisResultModule } from './app/diagnosis-result/diagnosis-result.module';
+import { DiagnosisResultDisorderModule } from './app/diagnosis-result-disorder/diagnosis-result-disorder.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { DiagnosisResultModule } from './app/diagnosis-result/diagnosis-result.m
     ConsultationModule,
     ConsultationDetailModule,
     DiagnosisResultModule,
+    DiagnosisResultDisorderModule,
   ],
   controllers: [AppController],
   providers: [

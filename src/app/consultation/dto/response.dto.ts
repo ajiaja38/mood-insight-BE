@@ -10,10 +10,15 @@ interface IDetailConsultation {
   symptom: string;
 }
 
+interface IDiagnosisResultDisorder {
+  id: string;
+  name: string;
+}
+
 interface IDiagnosisResult {
   id: string;
   belief_value: number;
-  disorder: string;
+  disorder: IDiagnosisResultDisorder[];
 }
 
 export interface IResDetailConsultation {

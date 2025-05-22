@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Consultation } from './model/consultation.entity';
 import { In, Repository } from 'typeorm';
@@ -15,12 +19,12 @@ import {
   IResAllConsultation,
   IResDetailConsultation,
 } from './dto/response.dto';
-import { Solution } from '../solution/model/solution.entity';
-
-interface IMassFunction {
-  disorders: string[];
-  belief: number;
-}
+import { DiagnosisResultDisorder } from '../diagnosis-result-disorder/model/diagnosis-result-disorder';
+import { Disorder } from '../disorder/model/disorder.entity';
+import {
+  IMassFunction,
+  IResNewConsultation,
+} from './interface/respomse.interface';
 
 @Injectable()
 export class ConsultationService {
@@ -33,6 +37,9 @@ export class ConsultationService {
 
     @InjectRepository(DiagnosisResult)
     private readonly diagnosisResultRepository: Repository<DiagnosisResult>,
+
+    @InjectRepository(DiagnosisResultDisorder)
+    private readonly diagnosisResultDisorderRepository: Repository<DiagnosisResultDisorder>,
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -50,7 +57,7 @@ export class ConsultationService {
   public async createConsultation(
     userId: string,
     { symptomIds }: CreateConsultationDto,
-  ): Promise<any> {
+  ): Promise<IResNewConsultation> {
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found');
 
@@ -68,11 +75,14 @@ export class ConsultationService {
       const symptom = await this.symtompRepository.findOneBy({ id: symptomId });
       if (!symptom) throw new NotFoundException('Symptom not found');
 
-      const lastDetail = await this.consultationDetailRepository.find({
-        order: { id: 'DESC' },
-        take: 1,
-      });
-      const newDetailId = generateID('CD', lastDetail[0]?.id ?? null);
+      const lastDetail: ConsultationDetail[] =
+        await this.consultationDetailRepository.find({
+          order: { id: 'DESC' },
+          take: 1,
+        });
+
+      const newDetailId: string = generateID('CD', lastDetail[0]?.id ?? null);
+
       await this.consultationDetailRepository.save({
         id: newDetailId,
         consultation: newConsultation,
@@ -80,10 +90,11 @@ export class ConsultationService {
       });
     }
 
-    const knowledgeBases = await this.knowledgeBaseRepository.find({
-      where: { symptom: { id: In(symptomIds) } },
-      relations: ['disorder', 'symptom'],
-    });
+    const knowledgeBases: KnowledgeBase[] =
+      await this.knowledgeBaseRepository.find({
+        where: { symptom: { id: In(symptomIds) } },
+        relations: ['disorder', 'symptom'],
+      });
 
     const massFunction: IMassFunction[] = [];
 
@@ -93,84 +104,130 @@ export class ConsultationService {
         belief: 0,
       };
 
-      let rawBelief = 0;
+      let rawBelief: number = 0;
 
-      const sykb = knowledgeBases.filter((kb) => kb.symptom.id === symptom);
+      const sykb: KnowledgeBase[] = knowledgeBases.filter(
+        (kb) => kb.symptom.id === symptom,
+      );
 
       for (const kb of sykb) {
         massFunc.disorders.push(kb.disorder.id);
         rawBelief += kb.weight;
       }
 
-      const belief = parseFloat((rawBelief / sykb.length).toFixed(2));
+      const belief: number = parseFloat((rawBelief / sykb.length).toFixed(2));
 
       massFunc.belief = belief;
       massFunction.push(massFunc);
     }
 
-    console.log(massFunction);
-
-    const extendedMassFunction = massFunction.map((m) => [
+    const extendedMassFunction: IMassFunction[][] = massFunction.map((m) => [
       m,
       { disorders: ['θ'], belief: parseFloat((1 - m.belief).toFixed(2)) },
     ]);
 
-    // STEP: Fungsi combine menggunakan aturan Dempster-Shafer
-    function combine(
-      m1: IMassFunction[],
-      m2: IMassFunction[],
-    ): IMassFunction[] {
-      const result: Record<string, number> = {};
-      let conflict = 0;
-
-      for (const mf1 of m1) {
-        for (const mf2 of m2) {
-          const intersection = mf1.disorders.includes('θ')
-            ? mf2.disorders
-            : mf2.disorders.includes('θ')
-              ? mf1.disorders
-              : mf1.disorders.filter((d) => mf2.disorders.includes(d));
-
-          if (intersection.length === 0) {
-            conflict += mf1.belief * mf2.belief;
-            continue;
-          }
-
-          const key = [...new Set(intersection)].sort().join(',');
-          result[key] = (result[key] || 0) + mf1.belief * mf2.belief;
-        }
-      }
-
-      const normalizedResult: IMassFunction[] = [];
-
-      for (const key in result) {
-        const belief = result[key] / (1 - conflict);
-        const disorders = key.split(',');
-        normalizedResult.push({
-          disorders,
-          belief: parseFloat(belief.toFixed(3)),
-        });
-      }
-
-      return normalizedResult;
-    }
-
-    let combined = extendedMassFunction[0];
+    let combined: IMassFunction[] = extendedMassFunction[0];
 
     for (let i = 1; i < extendedMassFunction.length; i++) {
-      combined = combine(combined, extendedMassFunction[i]);
+      combined = this.dempsterShafer(combined, extendedMassFunction[i]);
     }
 
     combined.sort((a, b) => b.belief - a.belief);
 
-    const mostProbableDisorders = combined[0];
+    const mostProbableDisorders: IMassFunction = combined[0];
 
-    console.log(combined);
+    for (const cb of combined) {
+      if (cb.disorders.includes('θ')) continue;
+
+      const lastDiagnosisResult: DiagnosisResult[] =
+        await this.diagnosisResultRepository.find({
+          order: { id: 'DESC' },
+          take: 1,
+        });
+
+      const newDoagnosisId: string = generateID(
+        'DR',
+        lastDiagnosisResult[0]?.id ?? null,
+      );
+
+      const diagnosisResuilt = await this.diagnosisResultRepository.save({
+        id: newDoagnosisId,
+        consultation: newConsultation,
+        belief_value: cb.belief,
+      });
+
+      if (!diagnosisResuilt)
+        throw new BadRequestException('Diagnosis not found');
+
+      for (const disorderId of cb.disorders) {
+        const lastDiagnosisResultDisorder: DiagnosisResultDisorder[] =
+          await this.diagnosisResultDisorderRepository.find({
+            order: { id: 'DESC' },
+            take: 1,
+          });
+
+        const newDoagnosisDisorderId: string = generateID(
+          'DRD',
+          lastDiagnosisResultDisorder[0]?.id ?? null,
+        );
+
+        await this.diagnosisResultDisorderRepository.save({
+          id: newDoagnosisDisorderId,
+          diagnosisResult: {
+            id: newDoagnosisId,
+          } as DiagnosisResult,
+          disorder: {
+            id: disorderId,
+          } as Disorder,
+        });
+      }
+    }
+
+    this.messageService.setMessage('New consultation created successfully');
 
     return {
       consultationId: newConsultation.id,
       result: mostProbableDisorders,
     };
+  }
+
+  private dempsterShafer(
+    m1: IMassFunction[],
+    m2: IMassFunction[],
+  ): IMassFunction[] {
+    const result: Record<string, number> = {};
+    let conflict: number = 0;
+
+    for (const mf1 of m1) {
+      for (const mf2 of m2) {
+        const intersection: string[] = mf1.disorders.includes('θ')
+          ? mf2.disorders
+          : mf2.disorders.includes('θ')
+            ? mf1.disorders
+            : mf1.disorders.filter((d) => mf2.disorders.includes(d));
+
+        if (intersection.length === 0) {
+          conflict += mf1.belief * mf2.belief;
+          continue;
+        }
+
+        const key: string = [...new Set(intersection)].sort().join(',');
+        result[key] = (result[key] || 0) + mf1.belief * mf2.belief;
+      }
+    }
+
+    const normalizedResult: IMassFunction[] = [];
+
+    for (const key in result) {
+      const belief: number = result[key] / (1 - conflict);
+      const disorders: string[] = key.split(',');
+      normalizedResult.push({
+        disorders,
+        belief: parseFloat(belief.toFixed(3)),
+      });
+    }
+
+    return normalizedResult;
   }
 
   public async findAllConsultation(
@@ -185,46 +242,33 @@ export class ConsultationService {
         },
         relations: [
           'user',
-          'consultationDetail',
           'diagnosisResult',
-          'diagnosisResult.disorder',
+          'diagnosisResult.diagnosisResultDisorder',
+          'diagnosisResult.diagnosisResultDisorder.disorder',
         ],
       },
     );
 
     this.messageService.setMessage('Get all consultation successfully');
 
-    return this.convertResponse(consultation);
-  }
-
-  private convertResponse(
-    consultations: Consultation[],
-  ): IResAllConsultation[] {
-    return consultations.map((consultation: Consultation) => {
-      const bestDiagnosis: DiagnosisResult = this.getBestDiagnosis(
-        consultation.diagnosisResult,
+    const response: IResAllConsultation[] = consultation.map((c) => {
+      const highestBeliefResult = c.diagnosisResult.reduce((prev, current) =>
+        prev.belief_value > current.belief_value ? prev : current,
       );
 
-      const percentage: string = (bestDiagnosis.belief_value * 100).toFixed(0);
-      const disorderName: string = bestDiagnosis.disorder?.name ?? 'Unknown';
+      const percenTage: string = (
+        highestBeliefResult.belief_value * 100
+      ).toFixed(0);
 
       return {
-        id: consultation.id,
-        user: consultation.user.name,
-        result: `nilai belief: ${percentage}% ${disorderName}`,
-        createdAt: consultation.createdAt,
+        id: c.id,
+        user: c.user.name,
+        result: `${percenTage}% ${highestBeliefResult.diagnosisResultDisorder[0].disorder.name}`,
+        createdAt: c.createdAt,
       };
     });
-  }
 
-  private getBestDiagnosis(
-    diagnosisResults: DiagnosisResult[],
-  ): DiagnosisResult {
-    return diagnosisResults.reduce(
-      (max, current) =>
-        current.belief_value > max.belief_value ? current : max,
-      diagnosisResults[0],
-    );
+    return response;
   }
 
   public async findDetailConsultation(
@@ -240,18 +284,19 @@ export class ConsultationService {
           'consultationDetail',
           'consultationDetail.symptom',
           'diagnosisResult',
-          'diagnosisResult.disorder',
-          'diagnosisResult.disorder.solution',
+          'diagnosisResult.diagnosisResultDisorder',
+          'diagnosisResult.diagnosisResultDisorder.disorder',
+          'diagnosisResult.diagnosisResultDisorder.disorder.solution',
         ],
       });
 
     if (!consultation) throw new NotFoundException('Consultation not found');
 
-    const bestDiagnosis: DiagnosisResult = this.getBestDiagnosis(
-      consultation.diagnosisResult,
-    );
-
     this.messageService.setMessage('Get detail consultation successfully');
+
+    const sortedDiagnosis = [...consultation.diagnosisResult].sort(
+      (a, b) => b.belief_value - a.belief_value,
+    );
 
     return {
       id: consultation.id,
@@ -266,16 +311,18 @@ export class ConsultationService {
           symptom: cd.symptom.symptom,
         }),
       ),
-      diagnosisResult: consultation.diagnosisResult
-        .sort((a, b) => b.belief_value - a.belief_value)
-        .map((dr: DiagnosisResult) => ({
-          id: dr.id,
-          belief_value: parseFloat(dr.belief_value.toFixed(2)),
-          disorder: dr.disorder.name,
+      diagnosisResult: sortedDiagnosis.map((dr) => ({
+        id: dr.id,
+        belief_value: parseFloat(dr.belief_value.toFixed(2)),
+        disorder: dr.diagnosisResultDisorder.map((drd) => ({
+          id: drd.disorder.id,
+          name: drd.disorder.name,
         })),
-      solution: bestDiagnosis.disorder.solution.map(
-        (s: Solution) => s.solution,
-      ),
+      })),
+      solution:
+        sortedDiagnosis[0]?.diagnosisResultDisorder[0]?.disorder.solution.map(
+          (s) => s.solution,
+        ) || [],
       createdAt: consultation.createdAt,
     };
   }
