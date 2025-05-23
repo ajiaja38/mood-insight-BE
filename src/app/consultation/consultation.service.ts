@@ -58,21 +58,34 @@ export class ConsultationService {
     userId: string,
     { symptomIds }: CreateConsultationDto,
   ): Promise<IResNewConsultation> {
-    const user = await this.userRepository.findOneBy({ id: userId });
+    const user: User | null = await this.userRepository.findOneBy({
+      id: userId,
+    });
+
     if (!user) throw new NotFoundException('User not found');
 
-    const lastConsultation = await this.consultationRepository.find({
-      order: { id: 'DESC' },
-      take: 1,
-    });
-    const newConsultationId = generateID('C', lastConsultation[0]?.id ?? null);
-    const newConsultation = await this.consultationRepository.save({
-      id: newConsultationId,
-      user,
-    });
+    const lastConsultation: Consultation[] =
+      await this.consultationRepository.find({
+        order: { id: 'DESC' },
+        take: 1,
+      });
+
+    const newConsultationId: string = generateID(
+      'C',
+      lastConsultation[0]?.id ?? null,
+    );
+
+    const newConsultation: Consultation =
+      await this.consultationRepository.save({
+        id: newConsultationId,
+        user,
+      });
 
     for (const symptomId of symptomIds) {
-      const symptom = await this.symtompRepository.findOneBy({ id: symptomId });
+      const symptom: Symptom | null = await this.symtompRepository.findOneBy({
+        id: symptomId,
+      });
+
       if (!symptom) throw new NotFoundException('Symptom not found');
 
       const lastDetail: ConsultationDetail[] =
@@ -106,16 +119,18 @@ export class ConsultationService {
 
       let rawBelief: number = 0;
 
-      const sykb: KnowledgeBase[] = knowledgeBases.filter(
+      const symptomKnowledgeBases: KnowledgeBase[] = knowledgeBases.filter(
         (kb) => kb.symptom.id === symptom,
       );
 
-      for (const kb of sykb) {
-        massFunc.disorders.push(kb.disorder.id);
-        rawBelief += kb.weight;
+      for (const knowledgeBase of symptomKnowledgeBases) {
+        massFunc.disorders.push(knowledgeBase.disorder.id);
+        rawBelief += knowledgeBase.weight;
       }
 
-      const belief: number = parseFloat((rawBelief / sykb.length).toFixed(2));
+      const belief: number = parseFloat(
+        (rawBelief / symptomKnowledgeBases.length).toFixed(2),
+      );
 
       massFunc.belief = belief;
       massFunction.push(massFunc);
@@ -136,8 +151,8 @@ export class ConsultationService {
 
     const mostProbableDisorders: IMassFunction = combined[0];
 
-    for (const cb of combined) {
-      if (cb.disorders.includes('θ')) continue;
+    for (const combineDisorder of combined) {
+      if (combineDisorder.disorders.includes('θ')) continue;
 
       const lastDiagnosisResult: DiagnosisResult[] =
         await this.diagnosisResultRepository.find({
@@ -150,16 +165,17 @@ export class ConsultationService {
         lastDiagnosisResult[0]?.id ?? null,
       );
 
-      const diagnosisResuilt = await this.diagnosisResultRepository.save({
-        id: newDoagnosisId,
-        consultation: newConsultation,
-        belief_value: cb.belief,
-      });
+      const diagnosisResuilt: DiagnosisResult =
+        await this.diagnosisResultRepository.save({
+          id: newDoagnosisId,
+          consultation: newConsultation,
+          belief_value: combineDisorder.belief,
+        });
 
       if (!diagnosisResuilt)
         throw new BadRequestException('Diagnosis not found');
 
-      for (const disorderId of cb.disorders) {
+      for (const disorderId of combineDisorder.disorders) {
         const lastDiagnosisResultDisorder: DiagnosisResultDisorder[] =
           await this.diagnosisResultDisorderRepository.find({
             order: { id: 'DESC' },
@@ -221,6 +237,7 @@ export class ConsultationService {
     for (const key in result) {
       const belief: number = result[key] / (1 - conflict);
       const disorders: string[] = key.split(',');
+
       normalizedResult.push({
         disorders,
         belief: parseFloat(belief.toFixed(3)),
@@ -246,14 +263,18 @@ export class ConsultationService {
           'diagnosisResult.diagnosisResultDisorder',
           'diagnosisResult.diagnosisResultDisorder.disorder',
         ],
+        order: {
+          createdAt: 'DESC',
+        },
       },
     );
 
     this.messageService.setMessage('Get all consultation successfully');
 
     const response: IResAllConsultation[] = consultation.map((c) => {
-      const highestBeliefResult = c.diagnosisResult.reduce((prev, current) =>
-        prev.belief_value > current.belief_value ? prev : current,
+      const highestBeliefResult: DiagnosisResult = c.diagnosisResult.reduce(
+        (prev, current) =>
+          prev.belief_value > current.belief_value ? prev : current,
       );
 
       const percenTage: string = (
@@ -294,9 +315,9 @@ export class ConsultationService {
 
     this.messageService.setMessage('Get detail consultation successfully');
 
-    const sortedDiagnosis = [...consultation.diagnosisResult].sort(
-      (a, b) => b.belief_value - a.belief_value,
-    );
+    const sortedDiagnosis: DiagnosisResult[] = [
+      ...consultation.diagnosisResult,
+    ].sort((a, b) => b.belief_value - a.belief_value);
 
     return {
       id: consultation.id,
@@ -311,18 +332,23 @@ export class ConsultationService {
           symptom: cd.symptom.symptom,
         }),
       ),
-      diagnosisResult: sortedDiagnosis.map((dr) => ({
-        id: dr.id,
-        belief_value: parseFloat(dr.belief_value.toFixed(2)),
-        disorder: dr.diagnosisResultDisorder.map((drd) => ({
-          id: drd.disorder.id,
-          name: drd.disorder.name,
-        })),
-      })),
+      diagnosisResult: sortedDiagnosis.map(
+        (diagnosisResult: DiagnosisResult) => ({
+          id: diagnosisResult.id,
+          belief_value: parseFloat(diagnosisResult.belief_value.toFixed(2)),
+          plausability_value: 1 - diagnosisResult.belief_value,
+          disorder: diagnosisResult.diagnosisResultDisorder.map(
+            (diagnosisResultDisorder: DiagnosisResultDisorder) => ({
+              id: diagnosisResultDisorder.disorder.id,
+              name: diagnosisResultDisorder.disorder.name,
+            }),
+          ),
+        }),
+      ),
       solution:
         sortedDiagnosis[0]?.diagnosisResultDisorder[0]?.disorder.solution.map(
           (s) => s.solution,
-        ) || [],
+        ),
       createdAt: consultation.createdAt,
     };
   }

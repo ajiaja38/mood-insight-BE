@@ -18,6 +18,7 @@ interface IDiagnosisResultDisorder {
 interface IDiagnosisResult {
   id: string;
   belief_value: number;
+  plausability_value: number;
   disorder: IDiagnosisResultDisorder[];
 }
 
