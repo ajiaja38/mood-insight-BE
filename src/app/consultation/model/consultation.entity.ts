@@ -1,6 +1,6 @@
-import { ConsultationDetail } from 'src/app/consultation-detail/model/consultation-detail.entity';
-import { DiagnosisResult } from 'src/app/diagnosis-result/model/diagnosis-result.entity';
-import { User } from 'src/app/user/model/user.entity';
+import { ConsultationDetail } from '../../consultation-detail/model/consultation-detail.entity';
+import { DiagnosisResult } from '../../diagnosis-result/model/diagnosis-result.entity';
+import { User } from '../../user/model/user.entity';
 import {
   CreateDateColumn,
   Entity,

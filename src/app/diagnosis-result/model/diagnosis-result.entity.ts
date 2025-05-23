@@ -1,5 +1,5 @@
-import { Consultation } from 'src/app/consultation/model/consultation.entity';
-import { DiagnosisResultDisorder } from 'src/app/diagnosis-result-disorder/model/diagnosis-result-disorder';
+import { Consultation } from '../../consultation/model/consultation.entity';
+import { DiagnosisResultDisorder } from '../../diagnosis-result-disorder/model/diagnosis-result-disorder';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity('diagnosis_result')

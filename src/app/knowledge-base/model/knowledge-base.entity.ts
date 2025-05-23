@@ -1,5 +1,5 @@
-import { Disorder } from 'src/app/disorder/model/disorder.entity';
-import { Symptom } from 'src/app/symptom/model/symptom.entity';
+import { Disorder } from '../../disorder/model/disorder.entity';
+import { Symptom } from '../../symptom/model/symptom.entity';
 import {
   Column,
   CreateDateColumn,

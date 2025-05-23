@@ -1,6 +1,5 @@
-import { DiagnosisResultDisorder } from 'src/app/diagnosis-result-disorder/model/diagnosis-result-disorder';
-import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
-import { Solution } from 'src/app/solution/model/solution.entity';
+import { DiagnosisResultDisorder } from '../../diagnosis-result-disorder/model/diagnosis-result-disorder';
+import { Solution } from '../../solution/model/solution.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +8,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { KnowledgeBase } from '../../knowledge-base/model/knowledge-base.entity';
 
 @Entity()
 export class Disorder {

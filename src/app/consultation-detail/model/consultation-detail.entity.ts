@@ -1,5 +1,5 @@
-import { Consultation } from 'src/app/consultation/model/consultation.entity';
-import { Symptom } from 'src/app/symptom/model/symptom.entity';
+import { Consultation } from '../../consultation/model/consultation.entity';
+import { Symptom } from '../../symptom/model/symptom.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity('consultation_detail')

@@ -1,6 +1,6 @@
-import { Consultation } from 'src/app/consultation/model/consultation.entity';
-import { ERole } from 'src/types/enum/ERole.enum';
-import { EGender } from 'src/types/enum/Gender.enum';
+import { Consultation } from '../../consultation/model/consultation.entity';
+import { ERole } from '../../../types/enum/ERole.enum';
+import { EGender } from '../../../types/enum/Gender.enum';
 import {
   Column,
   CreateDateColumn,

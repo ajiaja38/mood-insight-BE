@@ -1,5 +1,5 @@
-import { ConsultationDetail } from 'src/app/consultation-detail/model/consultation-detail.entity';
-import { KnowledgeBase } from 'src/app/knowledge-base/model/knowledge-base.entity';
+import { ConsultationDetail } from '../../consultation-detail/model/consultation-detail.entity';
+import { KnowledgeBase } from '../../knowledge-base/model/knowledge-base.entity';
 import {
   Column,
   CreateDateColumn,

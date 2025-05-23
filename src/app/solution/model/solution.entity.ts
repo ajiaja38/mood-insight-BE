@@ -1,4 +1,4 @@
-import { Disorder } from 'src/app/disorder/model/disorder.entity';
+import { Disorder } from '../../disorder/model/disorder.entity';
 import {
   Column,
   CreateDateColumn,

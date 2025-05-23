@@ -13,7 +13,7 @@ import { User } from '../user/model/user.entity';
 import { KnowledgeBase } from '../knowledge-base/model/knowledge-base.entity';
 import { CreateConsultationDto } from './dto/createConsultation.dto';
 import { Transactional } from 'typeorm-transactional';
-import { generateID } from 'src/utils/generateID';
+import { generateID } from '../../utils/generateID';
 import { Symptom } from '../symptom/model/symptom.entity';
 import {
   IResAllConsultation,
