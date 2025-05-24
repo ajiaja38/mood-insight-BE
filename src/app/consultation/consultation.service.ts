@@ -111,44 +111,48 @@ export class ConsultationService {
 
     const massFunction: IMassFunction[] = [];
 
-    for (const symptom of symptomIds) {
-      const massFunc: IMassFunction = {
-        disorders: [],
-        belief: 0,
-      };
-
-      let rawBelief: number = 0;
-
+    for (const symptomId of symptomIds) {
       const symptomKnowledgeBases: KnowledgeBase[] = knowledgeBases.filter(
-        (kb) => kb.symptom.id === symptom,
+        (kb) => kb.symptom.id === symptomId,
       );
 
-      for (const knowledgeBase of symptomKnowledgeBases) {
-        massFunc.disorders.push(knowledgeBase.disorder.id);
-        rawBelief += knowledgeBase.weight;
+      const rawBelief: number = symptomKnowledgeBases.reduce(
+        (sum, kb) => sum + kb.weight,
+        0,
+      );
+
+      const belief: number =
+        symptomKnowledgeBases.length === 0
+          ? 0
+          : parseFloat((rawBelief / symptomKnowledgeBases.length).toFixed(2));
+
+      const uniqueDisorders: string[] = [
+        ...new Set(symptomKnowledgeBases.map((kb) => kb.disorder.id)),
+      ];
+
+      if (belief > 0 && uniqueDisorders.length > 0) {
+        massFunction.push({
+          disorders: uniqueDisorders,
+          belief,
+        });
       }
-
-      const belief: number = parseFloat(
-        (rawBelief / symptomKnowledgeBases.length).toFixed(2),
-      );
-
-      massFunc.belief = belief;
-      massFunction.push(massFunc);
     }
 
     const extendedMassFunction: IMassFunction[][] = massFunction.map((m) => [
       m,
-      { disorders: ['θ'], belief: parseFloat((1 - m.belief).toFixed(2)) },
+      {
+        disorders: ['θ'],
+        belief: parseFloat((1 - m.belief).toFixed(2)),
+      },
     ]);
 
     let combined: IMassFunction[] = extendedMassFunction[0];
 
-    for (let i = 1; i < extendedMassFunction.length; i++) {
+    for (let i: number = 1; i < extendedMassFunction.length; i++) {
       combined = this.dempsterShafer(combined, extendedMassFunction[i]);
     }
 
     combined.sort((a, b) => b.belief - a.belief);
-
     const mostProbableDisorders: IMassFunction = combined[0];
 
     for (const combineDisorder of combined) {
@@ -160,19 +164,19 @@ export class ConsultationService {
           take: 1,
         });
 
-      const newDoagnosisId: string = generateID(
+      const newDiagnosisId: string = generateID(
         'DR',
         lastDiagnosisResult[0]?.id ?? null,
       );
 
-      const diagnosisResuilt: DiagnosisResult =
+      const diagnosisResult: DiagnosisResult =
         await this.diagnosisResultRepository.save({
-          id: newDoagnosisId,
+          id: newDiagnosisId,
           consultation: newConsultation,
           belief_value: combineDisorder.belief,
         });
 
-      if (!diagnosisResuilt)
+      if (!diagnosisResult)
         throw new BadRequestException('Diagnosis not found');
 
       for (const disorderId of combineDisorder.disorders) {
@@ -182,15 +186,15 @@ export class ConsultationService {
             take: 1,
           });
 
-        const newDoagnosisDisorderId: string = generateID(
+        const newDiagnosisDisorderId: string = generateID(
           'DRD',
           lastDiagnosisResultDisorder[0]?.id ?? null,
         );
 
         await this.diagnosisResultDisorderRepository.save({
-          id: newDoagnosisDisorderId,
+          id: newDiagnosisDisorderId,
           diagnosisResult: {
-            id: newDoagnosisId,
+            id: newDiagnosisId,
           } as DiagnosisResult,
           disorder: {
             id: disorderId,
@@ -203,7 +207,10 @@ export class ConsultationService {
 
     return {
       consultationId: newConsultation.id,
-      result: mostProbableDisorders,
+      result: {
+        disorders: mostProbableDisorders?.disorders ?? [],
+        belief: mostProbableDisorders?.belief ?? 0,
+      },
     };
   }
 
@@ -212,7 +219,7 @@ export class ConsultationService {
     m2: IMassFunction[],
   ): IMassFunction[] {
     const result: Record<string, number> = {};
-    let conflict: number = 0;
+    let conflict = 0;
 
     for (const mf1 of m1) {
       for (const mf2 of m2) {
@@ -230,6 +237,15 @@ export class ConsultationService {
         const key: string = [...new Set(intersection)].sort().join(',');
         result[key] = (result[key] || 0) + mf1.belief * mf2.belief;
       }
+    }
+
+    if (conflict === 1) {
+      return [
+        {
+          disorders: ['θ'],
+          belief: 1,
+        },
+      ];
     }
 
     const normalizedResult: IMassFunction[] = [];
@@ -271,23 +287,25 @@ export class ConsultationService {
 
     this.messageService.setMessage('Get all consultation successfully');
 
-    const response: IResAllConsultation[] = consultation.map((c) => {
-      const highestBeliefResult: DiagnosisResult = c.diagnosisResult.reduce(
-        (prev, current) =>
-          prev.belief_value > current.belief_value ? prev : current,
-      );
+    const response: IResAllConsultation[] = consultation.map(
+      (c: Consultation) => {
+        const highestBeliefResult: DiagnosisResult = c.diagnosisResult.reduce(
+          (prev: DiagnosisResult, current: DiagnosisResult) =>
+            prev.belief_value > current.belief_value ? prev : current,
+        );
 
-      const percenTage: string = (
-        highestBeliefResult.belief_value * 100
-      ).toFixed(0);
+        const percenTage: string = (
+          highestBeliefResult.belief_value * 100
+        ).toFixed(0);
 
-      return {
-        id: c.id,
-        user: c.user.name,
-        result: `${percenTage}% ${highestBeliefResult.diagnosisResultDisorder[0].disorder.name}`,
-        createdAt: c.createdAt,
-      };
-    });
+        return {
+          id: c.id,
+          user: c.user.name,
+          result: `${percenTage}% ${highestBeliefResult.diagnosisResultDisorder[0].disorder.name}`,
+          createdAt: c.createdAt,
+        };
+      },
+    );
 
     return response;
   }
