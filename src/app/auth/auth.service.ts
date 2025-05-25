@@ -46,7 +46,7 @@ export class AuthService {
       this.generateRefreshToken(jwtPayload),
     ]);
 
-    this.messageService.setMessage('Login successfully');
+    this.messageService.setMessage('Login user successfully');
 
     return { accessToken, refreshToken };
   }
