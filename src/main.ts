@@ -17,7 +17,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
     await NestFactory.create<INestApplication>(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:5371'],
+    origin: ['http://localhost:5173'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
