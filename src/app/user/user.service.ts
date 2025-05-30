@@ -70,6 +70,7 @@ export class UserService {
         'gender',
         'role',
       ],
+      order: { createdAt: 'ASC' },
     });
   }
 
