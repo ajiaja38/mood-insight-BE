@@ -1,3 +1,4 @@
+import { Type } from 'src/types/interface/ITypeClass.interface';
 import { Disorder } from '../../disorder/model/disorder.entity';
 import {
   Column,
@@ -19,7 +20,7 @@ export class Solution {
 
   @ManyToOne(() => Disorder, (disorder: Disorder) => disorder.solution)
   @JoinColumn({ name: 'disorder_id', referencedColumnName: 'id' })
-  disorder: Disorder;
+  disorder: Type<Disorder>;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

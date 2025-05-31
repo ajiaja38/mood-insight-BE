@@ -1,3 +1,4 @@
+import { Type } from 'src/types/interface/ITypeClass.interface';
 import { ConsultationDetail } from '../../consultation-detail/model/consultation-detail.entity';
 import { DiagnosisResult } from '../../diagnosis-result/model/diagnosis-result.entity';
 import { User } from '../../user/model/user.entity';
@@ -24,7 +25,7 @@ export class Consultation {
 
   @ManyToOne(() => User, (user: User) => user.consultation)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Type<User>;
 
   @OneToMany(
     () => ConsultationDetail,

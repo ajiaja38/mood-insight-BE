@@ -9,6 +9,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity({
   name: 'mst_user',
@@ -39,6 +40,7 @@ export class User {
   @Column({
     nullable: false,
   })
+  @Exclude()
   password: string;
 
   @Column({

@@ -1,3 +1,4 @@
+import { Type } from 'src/types/interface/ITypeClass.interface';
 import { Consultation } from '../../consultation/model/consultation.entity';
 import { Symptom } from '../../symptom/model/symptom.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
@@ -9,12 +10,12 @@ export class ConsultationDetail {
 
   @ManyToOne(() => Symptom, (symptom: Symptom) => symptom.consultationDetail)
   @JoinColumn({ name: 'symptom_id', referencedColumnName: 'id' })
-  symptom: Symptom;
+  symptom: Type<Symptom>;
 
   @ManyToOne(
     () => Consultation,
     (consultation: Consultation) => consultation.consultationDetail,
   )
   @JoinColumn({ name: 'consultation_id', referencedColumnName: 'id' })
-  consultation: Consultation;
+  consultation: Type<Consultation>;
 }

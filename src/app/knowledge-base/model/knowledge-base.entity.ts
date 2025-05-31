@@ -1,3 +1,4 @@
+import { Type } from 'src/types/interface/ITypeClass.interface';
 import { Disorder } from '../../disorder/model/disorder.entity';
 import { Symptom } from '../../symptom/model/symptom.entity';
 import {
@@ -19,11 +20,11 @@ export class KnowledgeBase {
 
   @ManyToOne(() => Symptom, (symptom: Symptom) => symptom.knowledgeBase)
   @JoinColumn({ name: 'symptom_id', referencedColumnName: 'id' })
-  symptom: Symptom;
+  symptom: Type<Symptom>;
 
   @ManyToOne(() => Disorder, (disorder: Disorder) => disorder.knowledgeBase)
   @JoinColumn({ name: 'disorder_id', referencedColumnName: 'id' })
-  disorder: Disorder;
+  disorder: Type<Disorder>;
 
   @Column({ nullable: false, type: 'float' })
   weight: number;

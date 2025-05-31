@@ -13,6 +13,7 @@ import { generateID } from 'src/utils/generateID';
 import { ERole } from 'src/types/enum/ERole.enum';
 import { Transactional } from 'typeorm-transactional';
 import { UpdateUserDto } from './dto/updateUsert.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -54,8 +55,10 @@ export class UserService {
 
     if (!user) throw new BadRequestException('Failed to create user');
 
+    const serializedUser: User = plainToInstance(User, user);
+
     this.messageService.setMessage('User created successfully');
-    return user;
+    return serializedUser;
   }
 
   public findAllUser(): Promise<User[]> {
@@ -77,21 +80,11 @@ export class UserService {
   public async findOneUser(id: string): Promise<User> {
     const user: User | null = await this.userRepository.findOne({
       where: { id },
-      select: [
-        'id',
-        'name',
-        'email',
-        'phoneNumber',
-        'address',
-        'gender',
-        'role',
-        'createdAt',
-        'updatedAt',
-      ],
     });
 
     if (!user) throw new NotFoundException('User not found');
 
+    this.messageService.setMessage('Get user successfully');
     return user;
   }
 
