@@ -39,7 +39,7 @@ export class KnowledgeBaseService {
     for (const kb of details) {
       const [symptom, disorder]: [Symptom | null, Disorder | null] =
         await Promise.all([
-          this.symptomRepository.findOneBy({ id: kb.sysmptomId }),
+          this.symptomRepository.findOneBy({ id: kb.symptomId }),
           this.disorderRepository.findOneBy({ id: kb.disorderId }),
         ]);
 
@@ -81,6 +81,7 @@ export class KnowledgeBaseService {
     const knowledgeBases: KnowledgeBase[] =
       await this.knowledgeBaseRepository.find({
         relations: ['symptom', 'disorder'],
+        order: { createdAt: 'ASC' },
       });
 
     this.messageService.setMessage('Get knowledge base successfully');

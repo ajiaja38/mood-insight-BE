@@ -12,7 +12,7 @@ import { EValBelief } from 'src/types/enum/EValueBelief.enum';
 class DetailKBDto {
   @IsString()
   @IsNotEmpty()
-  sysmptomId: string;
+  symptomId: string;
 
   @IsString()
   @IsNotEmpty()

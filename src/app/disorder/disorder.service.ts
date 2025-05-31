@@ -47,6 +47,7 @@ export class DisorderService {
     this.messageService.setMessage('Get all disorder successfully');
     return this.disorderRepository.find({
       select: ['id', 'name', 'description'],
+      order: { createdAt: 'ASC' },
     });
   }
 
