@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {
+  ConsoleLogger,
   INestApplication,
   Logger,
   ValidationPipe,
@@ -13,8 +14,16 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
 
   initializeTransactionalContext();
 
-  const app: INestApplication =
-    await NestFactory.create<INestApplication>(AppModule);
+  const app: INestApplication = await NestFactory.create<INestApplication>(
+    AppModule,
+    {
+      logger: new ConsoleLogger({
+        colors: true,
+        prefix: 'Mood Insight',
+        timestamp: true,
+      }),
+    },
+  );
 
   app.enableCors({
     origin: ['http://localhost:5173'],
