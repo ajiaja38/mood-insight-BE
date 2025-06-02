@@ -25,6 +25,8 @@ import { ConsultationModule } from './app/consultation/consultation.module';
 import { ConsultationDetailModule } from './app/consultation-detail/consultation-detail.module';
 import { DiagnosisResultModule } from './app/diagnosis-result/diagnosis-result.module';
 import { DiagnosisResultDisorderModule } from './app/diagnosis-result-disorder/diagnosis-result-disorder.module';
+import { datasource } from './config/database.config';
+import { RagModule } from './app/rag/rag.module';
 
 @Module({
   imports: [
@@ -35,14 +37,7 @@ import { DiagnosisResultDisorderModule } from './app/diagnosis-result-disorder/d
     TypeOrmModule.forRootAsync({
       useFactory() {
         return {
-          type: 'postgres',
-          host: process.env.POSTGRES_HOST,
-          port: Number(process.env.POSTGRES_PORT),
-          username: process.env.POSTGRES_USER,
-          password: process.env.POSTGRES_PASSWORD,
-          database: process.env.POSTGRES_DB,
-          entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: true,
+          ...datasource.options,
           autoLoadEntities: true,
         };
       },
@@ -65,6 +60,7 @@ import { DiagnosisResultDisorderModule } from './app/diagnosis-result-disorder/d
     ConsultationDetailModule,
     DiagnosisResultModule,
     DiagnosisResultDisorderModule,
+    RagModule,
   ],
   controllers: [AppController],
   providers: [
