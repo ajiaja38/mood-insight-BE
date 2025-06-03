@@ -63,7 +63,7 @@ export class SymptomService {
 
     if (!updatedSymptom) throw new Error('Failed to update symptom');
 
-    this.messageService.setMessage('Symptom updated successfully');
+    this.messageService.setMessage('Symptom updated successfully ⚡️');
     return updatedSymptom;
   }
 
