@@ -84,7 +84,7 @@ export class KnowledgeBaseService {
         order: { createdAt: 'ASC' },
       });
 
-    this.messageService.setMessage('Get knowledge base successfully');
+    this.messageService.setMessage('Get Knowledgebase successfully');
     return this.responseBuilder(knowledgeBases);
   }
 
