@@ -39,7 +39,7 @@ export class DisorderService {
 
     if (!disorder) throw new BadRequestException('Failed to create disorder');
 
-    this.messageService.setMessage('Disorder created successfully');
+    this.messageService.setMessage('Disorder has created successfully');
     return disorder;
   }
 
