@@ -25,6 +25,7 @@ import {
   IMassFunction,
   IResNewConsultation,
 } from './interface/respomse.interface';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ConsultationService {
@@ -64,20 +65,9 @@ export class ConsultationService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    const lastConsultation: Consultation[] =
-      await this.consultationRepository.find({
-        order: { id: 'DESC' },
-        take: 1,
-      });
-
-    const newConsultationId: string = generateID(
-      'C',
-      lastConsultation[0]?.id ?? null,
-    );
-
     const newConsultation: Consultation =
       await this.consultationRepository.save({
-        id: newConsultationId,
+        id: `C-${uuidv4()}`,
         user,
       });
 
