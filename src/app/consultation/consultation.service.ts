@@ -193,7 +193,7 @@ export class ConsultationService {
       }
     }
 
-    this.messageService.setMessage('Consultation created successfully');
+    this.messageService.setMessage('New Consultation created successfully');
 
     return {
       consultationId: newConsultation.id,
