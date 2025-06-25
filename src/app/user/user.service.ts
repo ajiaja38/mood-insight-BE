@@ -99,9 +99,8 @@ export class UserService {
         where: { email: updateUserDto.email },
       });
 
-      if (existing && existing.id !== id) {
+      if (existing && existing.id !== id)
         throw new BadRequestException('Email already in use');
-      }
     }
 
     user.name = updateUserDto.name;
@@ -113,7 +112,7 @@ export class UserService {
 
     if (!updatedUser) throw new BadRequestException('Failed to update user');
 
-    this.messageService.setMessage('User updated successfully');
+    this.messageService.setMessage('Update user successfully');
     return updatedUser;
   }
 
