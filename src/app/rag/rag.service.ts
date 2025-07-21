@@ -1,7 +1,7 @@
 import { ChatGroq } from '@langchain/groq';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { dbLangChain } from 'src/config/database.config';
+import { dbLangChain } from '../../config/database.config';
 import { SqlToolkit } from 'langchain/agents/toolkits/sql';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SqlDatabase } from 'langchain/sql_db';

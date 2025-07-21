@@ -1,4 +1,4 @@
-import { Type } from 'src/types/interface/ITypeClass.interface';
+import { Type } from '../../../types/interface/ITypeClass.interface';
 import { Disorder } from '../../disorder/model/disorder.entity';
 import { Symptom } from '../../symptom/model/symptom.entity';
 import {

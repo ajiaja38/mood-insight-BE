@@ -9,13 +9,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { KnowledgeBaseService } from './knowledge-base.service';
-import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
-import { RoleGuard } from 'src/guard/role.guard';
-import { EVersioning } from 'src/types/enum/EVersioning.enum';
+import { JwtAuthGuard } from '../../guard/jwtAuth.guard';
+import { RoleGuard } from '../../guard/role.guard';
+import { EVersioning } from '../../types/enum/EVersioning.enum';
 import { IKBResponse } from './dto/response.dto';
 import { CreateKBDto } from './dto/createKB.dto';
-import { ERole } from 'src/types/enum/ERole.enum';
-import { Roles } from 'src/decorator/roles.decorator';
+import { ERole } from '../../types/enum/ERole.enum';
+import { Roles } from '../../decorator/roles.decorator';
 import { UpdateKbDto } from './dto/updateKB.dto';
 
 @Controller({

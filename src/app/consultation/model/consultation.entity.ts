@@ -1,4 +1,4 @@
-import { Type } from 'src/types/interface/ITypeClass.interface';
+import { Type } from '../../../types/interface/ITypeClass.interface';
 import { ConsultationDetail } from '../../consultation-detail/model/consultation-detail.entity';
 import { DiagnosisResult } from '../../diagnosis-result/model/diagnosis-result.entity';
 import { User } from '../../user/model/user.entity';

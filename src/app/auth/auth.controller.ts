@@ -2,7 +2,7 @@ import { Body, Controller, Post, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RefreshTokenDto } from './dto/login.dto';
 import { ILoginResponse, IRefreshTokenResponse } from './dto/tokenResponse.dto';
-import { EVersioning } from 'src/types/enum/EVersioning.enum';
+import { EVersioning } from '../../types/enum/EVersioning.enum';
 
 @Controller({
   path: 'auth',

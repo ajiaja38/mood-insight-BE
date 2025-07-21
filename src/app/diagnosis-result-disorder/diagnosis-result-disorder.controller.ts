@@ -3,5 +3,7 @@ import { DiagnosisResultDisorderService } from './diagnosis-result-disorder.serv
 
 @Controller('diagnosis-result-disorder')
 export class DiagnosisResultDisorderController {
-  constructor(private readonly diagnosisResultDisorderService: DiagnosisResultDisorderService) {}
+  constructor(
+    private readonly diagnosisResultDisorderService: DiagnosisResultDisorderService,
+  ) {}
 }

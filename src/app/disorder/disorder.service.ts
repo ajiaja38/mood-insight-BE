@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Disorder } from './model/disorder.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { DisorderDto } from './dto/createDisorder.dto';
-import { generateID } from 'src/utils/generateID';
+import { generateID } from '../../utils/generateID';
 import { IDetailDisorder } from './dto/response.dto';
 
 @Injectable()

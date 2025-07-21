@@ -9,7 +9,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { Disorder } from '../disorder/model/disorder.entity';
 import { MessageService } from '../message/message.service';
 import { CreateSolutionDto, UpdateSolutionDto } from './dto/createSolution.dto';
-import { generateID } from 'src/utils/generateID';
+import { generateID } from '../../utils/generateID';
 
 @Injectable()
 export class SolutionService {

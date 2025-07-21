@@ -4,7 +4,7 @@ import { Symptom } from './model/symptom.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { MessageService } from '../message/message.service';
 import { SymptomDto } from './dto/symtom.dto';
-import { generateID } from 'src/utils/generateID';
+import { generateID } from '../../utils/generateID';
 
 @Injectable()
 export class SymptomService {

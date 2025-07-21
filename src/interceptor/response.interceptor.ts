@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MessageService } from 'src/app/message/message.service';
-import { ImetaPagination } from 'src/types/interface/IResPageWrapper.interface';
-import { IResponseEntity } from 'src/types/interface/IResponseEntity.interface';
+import { MessageService } from '../app/message/message.service';
+import { ImetaPagination } from '../types/interface/IResPageWrapper.interface';
+import { IResponseEntity } from '../types/interface/IResponseEntity.interface';
 
 interface IResponseWithMeta<D> {
   data: D;

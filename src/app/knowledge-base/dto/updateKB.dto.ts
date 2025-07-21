@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, Max, Min } from 'class-validator';
-import { EValBelief } from 'src/types/enum/EValueBelief.enum';
+import { EValBelief } from '../../../types/enum/EValueBelief.enum';
 
 export class UpdateKbDto {
   @IsNumber()

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { ERole } from 'src/types/enum/ERole.enum';
-import { IJwtPayload } from 'src/types/interface/IJwtPayload.interface';
+import { ERole } from '../types/enum/ERole.enum';
+import { IJwtPayload } from '../types/interface/IJwtPayload.interface';
 
 @Injectable()
 export class RoleGuard implements CanActivate {

@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { ILoginResponse, IRefreshTokenResponse } from './dto/tokenResponse.dto';
 import { LoginDto } from './dto/login.dto';
 import { PasswordConfService } from '../user/password.conf.service';
-import { IJwtPayload } from 'src/types/interface/IJwtPayload.interface';
+import { IJwtPayload } from '../../types/interface/IJwtPayload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 

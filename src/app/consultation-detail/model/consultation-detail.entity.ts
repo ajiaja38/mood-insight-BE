@@ -1,4 +1,4 @@
-import { Type } from 'src/types/interface/ITypeClass.interface';
+import { Type } from '../../../types/interface/ITypeClass.interface';
 import { Consultation } from '../../consultation/model/consultation.entity';
 import { Symptom } from '../../symptom/model/symptom.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';

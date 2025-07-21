@@ -11,7 +11,7 @@ import { Disorder } from '../disorder/model/disorder.entity';
 import { MessageService } from '../message/message.service';
 import { CreateKBDto } from './dto/createKB.dto';
 import { Transactional } from 'typeorm-transactional';
-import { generateID } from 'src/utils/generateID';
+import { generateID } from '../../utils/generateID';
 import { IKBResponse } from './dto/response.dto';
 import { UpdateKbDto } from './dto/updateKB.dto';
 

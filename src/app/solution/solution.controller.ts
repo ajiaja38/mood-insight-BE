@@ -9,13 +9,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SolutionService } from './solution.service';
-import { EVersioning } from 'src/types/enum/EVersioning.enum';
+import { EVersioning } from '../../types/enum/EVersioning.enum';
 import { CreateSolutionDto, UpdateSolutionDto } from './dto/createSolution.dto';
 import { Solution } from './model/solution.entity';
-import { Roles } from 'src/decorator/roles.decorator';
-import { ERole } from 'src/types/enum/ERole.enum';
-import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
-import { RoleGuard } from 'src/guard/role.guard';
+import { Roles } from '../../decorator/roles.decorator';
+import { ERole } from '../../types/enum/ERole.enum';
+import { JwtAuthGuard } from '../../guard/jwtAuth.guard';
+import { RoleGuard } from '../../guard/role.guard';
 
 @Controller({
   path: 'solution',
