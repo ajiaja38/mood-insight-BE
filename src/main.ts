@@ -26,7 +26,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
   );
 
   app.enableCors({
-    origin: ['https://moodinsight.vercel.app/', 'http://localhost:5173'],
+    origin: ['https://moodinsight.vercel.app', 'http://localhost:5173'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
