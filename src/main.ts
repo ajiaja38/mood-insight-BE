@@ -25,7 +25,11 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
     },
   );
 
-  app.enableCors('*');
+  app.enableCors({
+    origin: ['http://localhost:5173', 'https://mood-insight-fe.vercel.app'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   app.enableVersioning({
     type: VersioningType.URI,
