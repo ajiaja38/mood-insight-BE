@@ -27,7 +27,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
 
   app.enableCors({
     origin: ['*'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,PATCH',
     credentials: true,
   });
 
