@@ -1,0 +1,12 @@
+export declare enum EValBelief {
+    NOT_SURE = 0,
+    VERY_LESS_SURE = 0.1,
+    LESS_SURE = 0.2,
+    ALMOST_LESS_SURE = 0.3,
+    SLIGHTLY_SURE = 0.4,
+    SOMEWHAT_SURE = 0.5,
+    PRETTY_SURE = 0.6,
+    CLOSE_TO_SURE = 0.7,
+    SURE = 0.8,
+    VERY_SURE = 0.9
+}
