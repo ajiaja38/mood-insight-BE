@@ -110,7 +110,7 @@ export class KnowledgeBaseService {
       );
 
     if (!knowledgeBases.length)
-      throw new NotFoundException('Knowledge base not found');
+      throw new NotFoundException('Knowledge base is not found');
 
     this.messageService.setMessage('Get knowledge base by id successfully');
     return knowledgeBases[0];
