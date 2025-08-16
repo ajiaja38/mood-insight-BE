@@ -86,7 +86,7 @@ let KnowledgeBaseService = class KnowledgeBaseService {
         WHERE kb.id = '${id}';
         `);
         if (!knowledgeBases.length)
-            throw new common_1.NotFoundException('Knowledge base not found');
+            throw new common_1.NotFoundException('Knowledge base is not found');
         this.messageService.setMessage('Get knowledge base by id successfully');
         return knowledgeBases[0];
     }
