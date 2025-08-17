@@ -63,7 +63,7 @@ export class ConsultationService {
       id: userId,
     });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('User is not found');
 
     const newConsultation: Consultation =
       await this.consultationRepository.save({
